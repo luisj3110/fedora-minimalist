@@ -49,6 +49,7 @@ sudo systemctl set-default graphical.target
 # 6. STACK GRÁFICO (NVIDIA)
 install_nvidia() {
     echo "[INFO] -> Configurando repositorios RPM Fusion..."
+    # 1. Instalamos los repositorios primero
     sudo dnf install -y \
     https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
@@ -56,22 +57,20 @@ install_nvidia() {
     echo "[INFO] -> Refrescando metadatos de repositorios..."
     sudo dnf makecache
 
-    echo "[INFO] -> Instalando drivers NVIDIA y herramientas de aceleración..."
+    echo "[INFO] -> Instalando drivers NVIDIA y herramientas..."
     sudo dnf install -y \
         akmod-nvidia \
         xorg-x11-drv-nvidia-cuda \
         nvidia-settings \
-        nvidia-vaapi-driver \
+        libva-nvidia-driver \
         xorg-x11-server-Xwayland \
         mesa-dri-drivers \
         vulkan-loader \
-        vulkan-tools
+        vulkan-tools \
+        --skip-unavailable
 
-    echo "[INFO] -> Compilando módulos de kernel y regenerando initramfs..."
-    # akmods compila el driver y dracut lo integra en el arranque temprano
+    echo "[INFO] -> Compilando módulos de kernel..."
     sudo akmods --force && sudo dracut --force
-    
-    echo "[INFO] -> Configuración de NVIDIA completada."
 }
 
 if lspci | grep -qi nvidia; then
