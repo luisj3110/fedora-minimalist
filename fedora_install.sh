@@ -23,8 +23,9 @@ sudo dnf install -y \
     gnome-shell gdm nautilus gnome-control-center \
     gnome-settings-daemon gvfs-mtp gvfs-archive \
     xdg-user-dirs-gtk desktop-backgrounds-gnome \
-    polkit dconf network-manager \
+    polkit dconf NetworkManager \
     --setopt=install_weak_deps=False
+
 
 # 3. MULTIMEDIA & UX
 echo "[INFO] -> Configurando Audio (Pipewire-ALSA) y UX..."
