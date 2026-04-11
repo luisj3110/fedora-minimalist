@@ -43,8 +43,7 @@ sudo dnf install -y \
 libwacom xorg-x11-drv-wacom \
 libX11 libXcursor libXi libXrandr \
 mesa-libGLU mesa-libGL-devel \
-google-ubuntu-font-family \
---setopt=install_weak_deps=False
+--setopt=install_weak_deps=False --skip-unavailable
 
 
 # 5. CAPA FLATPAK (Aplicaciones de Usuario)
