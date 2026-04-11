@@ -2,103 +2,102 @@
 set -euo pipefail
 
 # LOGGING
-exec > >(tee -i install.log)
+LOG_FILE="install.log"
+exec > >(tee -i "$LOG_FILE")
 exec 2>&1
 
 echo "=================================================="
-echo "FEDORA EVERYTHING MINIMALIST INSTALLER (By KKMOLE69)"
+echo "FEDORA EVERYTHING INSTALLER MINIMAL"
 echo "=================================================="
 
 # 1. DNF OPTIMIZATION
-echo "[INFO] -> Optimizando DNF..."
-sudo bash -c 'echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf'
-sudo bash -c 'echo "fastestmirror=True" >> /etc/dnf/dnf.conf'
+echo "[INFO] -> Optimizando configuración de DNF..."
+sudo sed -i '/max_parallel_downloads/d' /etc/dnf/dnf.conf
+sudo sed -i '/fastestmirror/d' /etc/dnf/dnf.conf
+echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf
+echo "fastestmirror=True" | sudo tee -a /etc/dnf/dnf.conf
 
-# 2. GNOME SURGICAL CORE
-echo "[INFO] -> Instalando cimientos de GNOME..."
+# 2. SISTEMA BASE
+echo "[INFO] -> Instalando base GNOME..."
 sudo dnf install -y \
-    gnome-shell \
-    gdm \
-    nautilus \
-    gnome-control-center \
-    gnome-settings-daemon \
-    gvfs-mtp \
-    xdg-user-dirs-gtk \
-    desktop-backgrounds-gnome \
-    network-manager-applet \
+    gnome-shell gdm nautilus gnome-control-center \
+    gnome-settings-daemon gvfs-mtp gvfs-archive \
+    xdg-user-dirs-gtk desktop-backgrounds-gnome \
+    polkit dconf network-manager \
     --setopt=install_weak_deps=False
 
-# 3. COMPONENTES DEL SISTEMA
-echo "[INFO] -> Instalando herramientas de usuario..."
+# 3. MULTIMEDIA & UX
+echo "[INFO] -> Configurando Audio (Pipewire-ALSA) y UX..."
 sudo dnf install -y \
-    gnome-terminal \
-    kitty \
-    gnome-disk-utility \
-    pipewire pipewire-pulseaudio wireplumber \
-    xdg-desktop-portal-gnome \
-    gnome-keyring \
-    seahorse \
-    flatpak \
+    pipewire pipewire-pulseaudio pipewire-alsa wireplumber \
+    xdg-desktop-portal xdg-desktop-portal-gnome \
+    gnome-terminal kitty gnome-disk-utility \
+    gnome-keyring flatpak bluez \
     --setopt=install_weak_deps=False
 
-# 4. ACTIVAR INTERFAZ GRÁFICA
-echo "[INFO] -> Activando gestor de arranque gráfico..."
+# 4. HARDWARE & ESTABILIDAD
+echo "[INFO] -> Microcódigo y soporte de energía..."
+sudo dnf install -y amd-ucode-firmware fwupd --setopt=install_weak_deps=False
+sudo systemctl enable --now fwupd.service fstrim.timer
+sudo systemctl enable bluetooth.service
+
+# 5. ACTIVAR INTERFAZ
 sudo systemctl enable gdm
 sudo systemctl set-default graphical.target
 
-# 5. GRAPHICS STACK (NVIDIA + VULKAN)
+# 6. STACK GRÁFICO (NVIDIA)
 install_nvidia() {
-    echo "[INFO] -> Instalando drivers NVIDIA y RPM Fusion..."
+    echo "[INFO] -> Configurando repositorios RPM Fusion..."
     sudo dnf install -y \
     https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
-    sudo dnf install -y akmod-nvidia xorg-x11-drv-nvidia-cuda xorg-x11-server-Xwayland mesa-dri-drivers vulkan-loader
-    echo "[INFO] -> Compilando módulos (puede tardar)..."
+    echo "[INFO] -> Instalando drivers NVIDIA y herramientas de aceleración..."
+    sudo dnf install -y \
+        akmod-nvidia \
+        xorg-x11-drv-nvidia-cuda \
+        nvidia-settings \
+        nvidia-vaapi-driver \
+        xorg-x11-server-Xwayland \
+        mesa-dri-drivers \
+        vulkan-loader \
+        vulkan-tools
+
+    echo "[INFO] -> Compilando módulos de kernel y regenerando initramfs..."
+    # akmods compila el driver y dracut lo integra en el arranque temprano
     sudo akmods --force && sudo dracut --force
+    
+    echo "[INFO] -> Configuración de NVIDIA completada."
 }
 
 if lspci | grep -qi nvidia; then
-    echo "[INFO] -> Hardware NVIDIA detectado."
     install_nvidia
 else
-    echo "[WARNING] -> No se detectó hardware NVIDIA. Es posible que los drivers no sean necesarios o compatibles."
-    read -p "¿Deseas instalar los drivers de todos modos? (y/n): " force_nv
-    if [[ "$force_nv" == "y" || "$force_nv" == "Y" ]]; then
-        install_nvidia
-    else
-        echo "[INFO] -> Saltando instalación de NVIDIA."
-    fi
+    echo "No se detectó una grafica NVIDIA..."
+    read -p "¿Deseas instalar sus drivers de todas formas? (y/n): " force_nv
+    [[ "$force_nv" =~ ^[Yy]$ ]] && install_nvidia
 fi
 
-# 6. TABLET + LIBS 3D
-echo "[INFO] -> Soporte 3D y Tabletas graficas..."
+# 7. LIBRERÍAS 3D & TABLETAS GRÁFICAS
 sudo dnf install -y \
     libwacom xorg-x11-drv-wacom \
     libX11 libXcursor libXi libXrandr mesa-libGLU \
+    libxkbcommon libxkbcommon-x11 \
     --setopt=install_weak_deps=False --skip-unavailable
 
-# 7. FLATPAK APPS
-echo "[INFO] -> Configurando aplicaciones..."
+# 8. APPS & PERSONALIZACIÓN
+echo "[INFO] -> Instalando Apps y herramientas de personalización..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub -y \
-    com.brave.Browser \
-    org.gnome.Showtime \
-    org.gnome.Calculator \
-    org.gnome.TextEditor \
-    org.gnome.Decibels
+flatpak install flathub -y com.brave.Browser org.gnome.Showtime org.gnome.Calculator org.gnome.TextEditor org.gnome.Decibels
 
-# 8. TWEAKS (Nombre de paquete corregido)
-echo "[INFO] -> Herramientas de personalización..."
 sudo dnf install -y gnome-tweaks extension-manager btop --skip-unavailable
 
-# 9. LIMPIEZA FINAL
-echo "[INFO] -> Limpiando dependencias..."
+# 9. LIMPIEZA
 sudo dnf autoremove -y
 
-echo "=================================================="
+echo "========================"
 echo "INSTALACIÓN COMPLETADA"
-echo "=================================================="
+echo "========================"
 
 read -p "¿Reiniciar ahora? (y/n): " choice
-[[ "$choice" == "y" ]] && reboot
+[[ "$choice" =~ ^[Yy]$ ]] && reboot
