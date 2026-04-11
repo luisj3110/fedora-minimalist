@@ -88,7 +88,7 @@ sudo dnf install -y \
 # 8. APPS & PERSONALIZACIÓN
 echo "[INFO] -> Instalando Apps y herramientas de personalización..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub -y com.brave.Browser org.gnome.Showtime org.gnome.Loupe org.gnome.Calculator org.gnome.TextEditor org.gnome.Decibels
+flatpak install flathub -y com.brave.Browser org.gnome.Showtime org.gnome.Loupe org.gnome.Calculator org.gnome.TextEditor org.gnome.Decibels com.mattjakeman.ExtensionManager
 
 sudo dnf install -y gnome-tweaks extension-manager btop --skip-unavailable
 
