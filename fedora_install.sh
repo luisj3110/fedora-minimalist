@@ -10,6 +10,7 @@ echo "Optimizando DNF para descargas paralelas..."
 sudo bash -c 'echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf'
 sudo bash -c 'echo "fastestmirror=True" >> /etc/dnf/dnf.conf'
 
+
 # 2. NÚCLEO GNOME & GESTIÓN DE DISCOS
 echo "Instalando entorno GNOME filtrado..."
 sudo dnf install @gnome-desktop --setopt=install_weak_deps=False -y
@@ -21,6 +22,7 @@ pipewire pipewire-pulseaudio wireplumber \
 xdg-desktop-portal-gnome xdg-user-dirs-gtk \
 gnome-keyring kitty \
 --setopt=install_weak_deps=False
+
 
 # 3. GRÁFICOS NVIDIA (GTX 1650)
 echo "Configurando drivers NVIDIA y XWayland..."
@@ -58,14 +60,13 @@ org.gnome.TextEditor \
 org.gnome.Decibels
 
 
-# 6. DATA ENGINEERING TOOLS
-echo "Configurando Docker y herramientas de monitoreo..."
+# 6. HERRAMIENTAS DE SISTEMA
+echo "Instalando herramientas de personalización y monitoreo..."
 sudo dnf install -y \
-gnome-tweaks gnome-extension-manager btop \
-docker docker-compose-plugin
-
-sudo usermod -aG docker $USER
-sudo systemctl disable docker
+gnome-tweaks \
+extension-manager \
+btop \
+--setopt=install_weak_deps=False --skip-unavailable
 
 
 # 7. LIMPIEZA Y CIERRE
@@ -73,6 +74,6 @@ echo "Limpiando dependencias huérfanas..."
 sudo dnf autoremove -y
 
 echo "=================================================="
-echo "INSTALACIÓN COMPLETADA CON ÉXITO"
+echo "✅ INSTALACIÓN COMPLETADA CON ÉXITO"
 echo "⚠️  REINICIA AHORA."
 echo "=================================================="
