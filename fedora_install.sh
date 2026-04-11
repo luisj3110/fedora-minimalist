@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "=================================================="
-echo "[INFO] -> Fedora Everything Minimalist"
+echo "FEDORA EVERYTHING MINIMALIST INSTALLER"
 echo "=================================================="
 
 
@@ -87,13 +87,16 @@ fi
 
 # 8. MULTIMEDIA (CRÍTICO)
 echo "[INFO] -> Instalando códecs multimedia..."
-sudo dnf install -y \
-ffmpeg ffmpeg-libs \
-gstreamer1-plugins-bad-* \
-gstreamer1-plugins-good \
-gstreamer1-plugins-base \
-gstreamer1-libav \
---setopt=install_weak_deps=False
+dnf install -y \
+  ffmpeg \
+  gstreamer1-plugins-good \
+  gstreamer1-plugins-base \
+  gstreamer1-plugins-bad-free \
+  gstreamer1-plugins-bad-freeworld \
+  gstreamer1-libav \
+  --setopt=install_weak_deps=False || {
+    echo "[WARN] Algunos codecs no se instalaron"
+}
 
 
 # 9. TABLET + LIBS 3D
