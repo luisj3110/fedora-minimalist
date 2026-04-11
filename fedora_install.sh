@@ -12,7 +12,7 @@ sudo bash -c 'echo "fastestmirror=True" >> /etc/dnf/dnf.conf'
 
 # 2. NÚCLEO GNOME & GESTIÓN DE DISCOS
 echo "Instalando entorno GNOME filtrado..."
-sudo dnf groupinstall "GNOME" --setopt=install_weak_deps=False -y
+sudo dnf install @gnome-desktop --setopt=install_weak_deps=False -y
 
 # Añadimos la Utilidad de Discos y componentes de sistema
 sudo dnf install -y \
