@@ -1,6 +1,6 @@
 **Fedora Minimalist**
 
-A surgically clean, high-performance installer for Fedora Everything
+A clean, high-performance installer for Fedora Everything
 
 This script is designed for developers and creatives who want a rock-solid, bloat-free environment without the overhead of a standard workstation install. It transforms a minimal Fedora base into a robust professional workstation that’s ready for heavy data pipelines and AAA 3D modeling.
 
