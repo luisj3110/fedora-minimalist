@@ -34,10 +34,15 @@ echo "[INFO] -> Instalando motores de software y audio..."
 sudo dnf install -y flatpak pipewire wireplumber --setopt=install_weak_deps=False
 
 sudo dnf install -y \
-    pipewire pipewire-pulseaudio pipewire-alsa wireplumber \
-    xdg-desktop-portal xdg-desktop-portal-gnome \
-    gnome-terminal kitty gnome-disk-utility \
-    gnome-keyring gnome-shell-extension-prefs \
+    pipewire \
+    pipewire-pulseaudio \
+    pipewire-alsa wireplumber \
+    xdg-desktop-portal \
+    xdg-desktop-portal-gnome \
+    gnome-terminal \
+    kitty gnome-disk-utility \
+    gnome-keyring \
+    gnome-shell-extension-prefs \
     bluez \
     --setopt=install_weak_deps=False
 
@@ -106,11 +111,12 @@ flatpak install flathub -y \
     org.gnome.Calculator \
     org.gnome.TextEditor \
     org.gnome.Decibels \
-    com.mattjakeman.ExtensionManager
+    com.mattjakeman.ExtensionManager \
+    net.nokyan.Resources
 
 flatpak update -y
 
-sudo dnf install -y gnome-tweaks --skip-unavailable
+sudo dnf install -y gnome-tweaks btop --skip-unavailable
 
 # 9. LIMPIEZA
 sudo dnf autoremove -y
