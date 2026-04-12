@@ -43,7 +43,12 @@ sudo dnf install -y \
     kitty gnome-disk-utility \
     gnome-keyring \
     bluez \
+    gnome-tweaks \
+    btop \
+    gamemode \
+    gamescope \
     --setopt=install_weak_deps=False
+
 
 # 4. HARDWARE & ESTABILIDAD
 echo "[INFO] -> Microcódigo y soporte de energía..."
@@ -88,12 +93,50 @@ else
     [[ "$force_nv" =~ ^[Yy]$ ]] && install_nvidia
 fi
 
-# 7. LIBRERÍAS 3D & TABLETAS GRÁFICAS
+# 7. LIBRERÍAS & TABLETAS GRÁFICAS
 sudo dnf install -y \
     libwacom xorg-x11-drv-wacom \
     libX11 libXcursor libXi libXrandr mesa-libGLU \
     libxkbcommon libxkbcommon-x11 \
     --setopt=install_weak_deps=False --skip-unavailable
+
+# COMPATIBILIDAD 32-BIT (GAMING)
+install_32bit_compat() {
+    echo "[INFO] -> Instalando librerías 32-bit para compatibilidad con juegos..."
+
+    # Base OpenGL / Mesa 32-bit
+    sudo dnf install -y \
+        mesa-dri-drivers.i686 \
+        mesa-libGL.i686 \
+        libglvnd-glx.i686 \
+        vulkan-loader.i686 \
+        --setopt=install_weak_deps=False --skip-unavailable || {
+        echo "[WARN] Fallo parcial en librerías Mesa 32-bit"
+    }
+
+    # Si hay NVIDIA, se añade el soporte para 32-bit
+    if lspci -nn | grep -qi nvidia; then
+        echo "[INFO] -> Detectada GPU NVIDIA, instalando librerías 32-bit correspondientes..."
+
+        sudo dnf install -y \
+            xorg-x11-drv-nvidia-libs.i686 \
+            --skip-unavailable || {
+            echo "[WARN] No se pudieron instalar librerías NVIDIA 32-bit"
+        }
+    else
+        echo "[INFO] -> No se detectó NVIDIA, usando stack Mesa 32-bit"
+    fi
+
+    echo "[INFO] -> Compatibilidad 32-bit instalada correctamente"
+}
+
+# Pregunta interactiva
+read -p "¿Instalar compatibilidad para juegos 32-bit (Steam/Wine)? (y/n): " choice
+if [[ "$choice" =~ ^[Yy]$ ]]; then
+    install_32bit_compat
+else
+    echo "[INFO] -> Se omitió compatibilidad 32-bit"
+fi
 
 # 8. APPS & PERSONALIZACIÓN
 if ! command -v flatpak &> /dev/null; then
@@ -115,7 +158,7 @@ flatpak install flathub -y \
 
 flatpak update -y
 
-sudo dnf install -y gnome-tweaks btop --skip-unavailable
+echo "* - nice -20" | sudo tee -a /etc/security/limits.conf
 
 # 9. LIMPIEZA
 sudo dnf autoremove -y
