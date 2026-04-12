@@ -31,13 +31,16 @@ sudo dnf install -y \
 
 
 # 3. MULTIMEDIA & UX
-echo "[INFO] -> Configurando Audio (Pipewire-ALSA) y UX..."
+echo "[INFO] -> Instalando motores de software y audio..."
+
+sudo dnf install -y flatpak pipewire wireplumber --setopt=install_weak_deps=False
+
 sudo dnf install -y \
     pipewire pipewire-pulseaudio pipewire-alsa wireplumber \
     xdg-desktop-portal xdg-desktop-portal-gnome \
     gnome-terminal kitty gnome-disk-utility \
     gnome-keyring gnome-shell-extension-prefs \
-    flatpak bluez \
+    bluez \
     --setopt=install_weak_deps=False || {
     echo "[WARN] Fallo parcial en multimedia/UX"
 }
@@ -101,6 +104,11 @@ sudo dnf install -y \
 }
 
 # 8. APPS & PERSONALIZACIÓN
+if ! command -v flatpak &> /dev/null; then
+    echo "[RETRY] Flatpak no encontrado. Intentando instalar nuevamente..."
+    sudo dnf install -y flatpak
+fi
+
 echo "[INFO] -> Instalando aplicaciones..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 flatpak install flathub -y \
