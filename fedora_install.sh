@@ -25,9 +25,7 @@ sudo dnf install -y \
     gnome-settings-daemon gvfs-mtp gvfs-archive \
     xdg-user-dirs-gtk desktop-backgrounds-gnome \
     polkit dconf NetworkManager \
-    --setopt=install_weak_deps=False --skip-unavailable || {
-    echo "[WARN] Fallo parcial en instalación base GNOME"
-}
+    --setopt=install_weak_deps=False --skip-unavailable
 
 
 # 3. MULTIMEDIA & UX
@@ -41,15 +39,11 @@ sudo dnf install -y \
     gnome-terminal kitty gnome-disk-utility \
     gnome-keyring gnome-shell-extension-prefs \
     bluez \
-    --setopt=install_weak_deps=False || {
-    echo "[WARN] Fallo parcial en multimedia/UX"
-}
+    --setopt=install_weak_deps=False
 
 # 4. HARDWARE & ESTABILIDAD
 echo "[INFO] -> Microcódigo y soporte de energía..."
-sudo dnf install -y amd-ucode-firmware fwupd --setopt=install_weak_deps=False || {
-    echo "[WARN] Fallo en instalación de firmware"
-}
+sudo dnf install -y amd-ucode-firmware fwupd --setopt=install_weak_deps=False
 
 sudo systemctl enable --now fwupd.service fstrim.timer
 sudo systemctl enable --now bluetooth.service
@@ -63,9 +57,7 @@ install_nvidia() {
     echo "[INFO] -> Configurando repositorios RPM Fusion..."
     sudo dnf install -y \
     https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm || {
-        echo "[WARN] No se pudieron instalar repos RPM Fusion"
-    }
+    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
     echo "[INFO] -> Refrescando metadatos..."
     sudo dnf makecache
@@ -75,9 +67,7 @@ install_nvidia() {
         akmod-nvidia xorg-x11-drv-nvidia-cuda nvidia-settings \
         libva-nvidia-driver kernel-devel kernel-headers xorg-x11-server-Xwayland \
         mesa-dri-drivers vulkan-loader vulkan-tools \
-        --skip-unavailable || {
-        echo "[WARN] Fallo parcial en drivers NVIDIA"
-    }
+        --skip-unavailable
 
     echo "[INFO] -> Iniciando compilación de módulos..."
     sudo akmods --akmod nvidia
@@ -99,9 +89,7 @@ sudo dnf install -y \
     libwacom xorg-x11-drv-wacom \
     libX11 libXcursor libXi libXrandr mesa-libGLU \
     libxkbcommon libxkbcommon-x11 \
-    --setopt=install_weak_deps=False --skip-unavailable || {
-    echo "[WARN] Fallo parcial en librerías 3D"
-}
+    --setopt=install_weak_deps=False --skip-unavailable
 
 # 8. APPS & PERSONALIZACIÓN
 if ! command -v flatpak &> /dev/null; then
@@ -118,15 +106,11 @@ flatpak install flathub -y \
     org.gnome.Calculator \
     org.gnome.TextEditor \
     org.gnome.Decibels \
-    com.mattjakeman.ExtensionManager || {
-    echo "[WARN] Fallo en instalación de Flatpaks"
-}
+    com.mattjakeman.ExtensionManager
 
 flatpak update -y
 
-sudo dnf install -y gnome-tweaks --skip-unavailable || {
-    echo "[WARN] No se pudo instalar gnome-tweaks"
-}
+sudo dnf install -y gnome-tweaks --skip-unavailable
 
 # 9. LIMPIEZA
 sudo dnf autoremove -y
