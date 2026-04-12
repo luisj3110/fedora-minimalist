@@ -42,7 +42,6 @@ sudo dnf install -y \
     gnome-terminal \
     kitty gnome-disk-utility \
     gnome-keyring \
-    gnome-shell-extension-prefs \
     bluez \
     --setopt=install_weak_deps=False
 
