@@ -7,7 +7,7 @@ exec > >(tee -i "$LOG_FILE")
 exec 2>&1
 
 echo "=================================================="
-echo "FEDORA EVERYTHING INSTALLER MINIMAL (By KKmole69)"
+echo "FEDORA MINIMALIST INSTALLER  (By KKmole69)"
 echo "=================================================="
 
 # 1. DNF OPTIMIZATION
