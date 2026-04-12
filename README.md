@@ -32,7 +32,12 @@ A carefully curated list of essential apps via Flatpak for isolation:
 
 **How to Use**
 
-1.  Get the ISO: Download the [Fedora Everything ISO](https://alt.fedoraproject.org/) and perform a "Minimal Install."
+1.  **Get the ISO: Download the [Fedora Everything ISO](https://alt.fedoraproject.org/) and perform a "Minimal Install."**
+**Pre-installation (Fedora Everything)**
+To keep the system as lean as possible, use the **Fedora Everything ISO** and select the following during the Software Selection step:
+    **Base Environment:** Select `Fedora Custom Operating System`.
+    **Add-ons:** Check `C Development Tools and Libraries` (This is mandatory for NVIDIA driver compilation).
+    **Add-ons:** Check `Common NetworkManager Submodules` to ensure stable connectivity for the script.
 2.  **Clone & Prep:**
     ```bash
     git clone https://github.com/luisj3110/fedora-minimalist.git
