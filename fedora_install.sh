@@ -31,9 +31,8 @@ sudo dnf install -y \
 # 3. MULTIMEDIA & UX
 echo "[INFO] -> Instalando motores de software y audio..."
 
-sudo dnf install -y flatpak pipewire wireplumber --setopt=install_weak_deps=False
-
 sudo dnf install -y \
+    flatpak \
     pipewire \
     pipewire-pulseaudio \
     pipewire-alsa wireplumber \
@@ -45,8 +44,6 @@ sudo dnf install -y \
     bluez \
     gnome-tweaks \
     btop \
-    gamemode \
-    gamescope \
     --setopt=install_weak_deps=False
 
 
@@ -102,7 +99,7 @@ sudo dnf install -y \
 
 # COMPATIBILIDAD 32-BIT (GAMING)
 install_32bit_compat() {
-    echo "[INFO] -> Instalando librerías 32-bit para compatibilidad con juegos..."
+    echo "[INFO] -> Instalando librerías 32-bit y compatibilidad con juegos..."
 
     # Base OpenGL / Mesa 32-bit
     sudo dnf install -y \
@@ -110,6 +107,8 @@ install_32bit_compat() {
         mesa-libGL.i686 \
         libglvnd-glx.i686 \
         vulkan-loader.i686 \
+        gamemode \
+        gamescope \
         --setopt=install_weak_deps=False --skip-unavailable || {
         echo "[WARN] Fallo parcial en librerías Mesa 32-bit"
     }
@@ -127,16 +126,17 @@ install_32bit_compat() {
         echo "[INFO] -> No se detectó NVIDIA, usando stack Mesa 32-bit"
     fi
 
-    echo "[INFO] -> Compatibilidad 32-bit instalada correctamente"
+    echo "[INFO] -> Compatibilidad 32-bit y paquetes gaming instalados correctamente"
 }
 
 # Pregunta interactiva
-read -p "¿Instalar compatibilidad para juegos 32-bit (Steam/Wine)? (y/n): " choice
+read -p "¿Desea instalar compatibilidad para juegos y librerías 32-bit? (Steam/Wine, Vulkan 32-bit, GameMode, Gamescope) (y/n): " choice
 if [[ "$choice" =~ ^[Yy]$ ]]; then
     install_32bit_compat
 else
-    echo "[INFO] -> Se omitió compatibilidad 32-bit"
+    echo "[INFO] -> Se omitió la compatibilidad para juegos y librerías 32-bit"
 fi
+
 
 # 8. APPS & PERSONALIZACIÓN
 if ! command -v flatpak &> /dev/null; then
@@ -157,8 +157,6 @@ flatpak install flathub -y \
     net.nokyan.Resources
 
 flatpak update -y
-
-echo "* - nice -20" | sudo tee -a /etc/security/limits.conf
 
 # 9. LIMPIEZA
 sudo dnf autoremove -y
