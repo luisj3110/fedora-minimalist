@@ -17,6 +17,15 @@ sudo sed -i '/fastestmirror/d' /etc/dnf/dnf.conf
 echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf
 echo "fastestmirror=True" | sudo tee -a /etc/dnf/dnf.conf
 
+echo "[INFO] -> Configurando repositorios RPM Fusion..."
+sudo dnf install -y \
+    https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+sudo dnf makecache --refresh
+
+sudo dnf upgrade -y
+
 # 2. SISTEMA BASE
 echo "[INFO] -> Instalando base de GNOME..."
 sudo dnf install -y \
@@ -32,18 +41,21 @@ sudo dnf install -y \
 echo "[INFO] -> Instalando motores de software y audio..."
 
 sudo dnf install -y \
+    bluez \
+    btop \
     flatpak \
+    gnome-keyring \
+    gnome-terminal \
+    gnome-tweaks \
+    kitty gnome-disk-utility \
     pipewire \
+    pipewire-alsa \
+    pipewire-codec-aptx \
+    libldac \
     pipewire-pulseaudio \
-    pipewire-alsa wireplumber \
+    wireplumber \
     xdg-desktop-portal \
     xdg-desktop-portal-gnome \
-    gnome-terminal \
-    kitty gnome-disk-utility \
-    gnome-keyring \
-    bluez \
-    gnome-tweaks \
-    btop \
     --setopt=install_weak_deps=False
 
 
@@ -60,11 +72,6 @@ sudo systemctl set-default graphical.target
 
 # 6. STACK GRÁFICO (NVIDIA)
 install_nvidia() {
-    echo "[INFO] -> Configurando repositorios RPM Fusion..."
-    sudo dnf install -y \
-    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
-    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-
     echo "[INFO] -> Refrescando metadatos..."
     sudo dnf makecache
 
