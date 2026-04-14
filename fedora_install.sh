@@ -39,7 +39,7 @@ sudo dnf install -y \
 
 # 3. MULTIMEDIA & UX
 echo "[INFO] -> Instalando motores de software y audio..."
-
+sudo dnf swap -y ffmpeg-free ffmpeg --allowerasing
 sudo dnf install -y \
     bluez \
     btop \
@@ -47,11 +47,16 @@ sudo dnf install -y \
     gnome-keyring \
     gnome-terminal \
     gnome-tweaks \
+    gstreamer1-libav \
+    gstreamer1-plugins-bad-free-extras \
+    gstreamer1-plugins-bad-freeworld \
+    gstreamer1-plugins-ugly \
     kitty gnome-disk-utility \
+    libldac \
     pipewire \
     pipewire-alsa \
     pipewire-codec-aptx \
-    libldac \
+    pipewire-gstreamer \
     pipewire-pulseaudio \
     wireplumber \
     xdg-desktop-portal \
