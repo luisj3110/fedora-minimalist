@@ -116,19 +116,24 @@ sudo dnf install -y \
     power-profiles-daemon \
     --setopt=install_weak_deps=False
 
+# --- SEGURIDAD & RED ---
 echo "[INFO] -> Configurando seguridad y servicios de red..."
 sudo dnf install -y \
     openssl \
     ca-certificates \
     --setopt=install_weak_deps=False
 
-sudo firewall-cmd --permanent --add-service=cups
+sudo systemctl enable --now firewalld
+
+sudo firewall-cmd --permanent --add-port=631/tcp
+sudo firewall-cmd --permanent --add-port=631/udp
 sudo firewall-cmd --permanent --add-service=mdns
-sudo firewall-cmd --reload
 sudo firewall-cmd --set-default-zone=public
+
+sudo firewall-cmd --reload
 sudo systemctl enable avahi-daemon
 sudo systemctl enable cups
-sudo systemctl enable firewalld
+
 
 
 # 4. HARDWARE & ESTABILIDAD
