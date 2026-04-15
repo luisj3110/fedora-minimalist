@@ -39,28 +39,77 @@ sudo dnf install -y \
 
 # 3. MULTIMEDIA & UX
 echo "[INFO] -> Instalando motores de software y audio..."
+# AUDIO & CODECS
+echo "[INFO] -> Configurando motor de audio y codecs..."
 sudo dnf swap -y ffmpeg-free ffmpeg --allowerasing
 sudo dnf install -y \
-    bluez \
-    btop \
-    flatpak \
-    gnome-keyring \
-    gnome-terminal \
-    gnome-tweaks \
-    gstreamer1-libav \
-    gstreamer1-plugins-bad-free-extras \
-    gstreamer1-plugins-bad-freeworld \
-    gstreamer1-plugins-ugly \
-    kitty gnome-disk-utility \
     libldac \
     pipewire \
     pipewire-alsa \
     pipewire-codec-aptx \
     pipewire-gstreamer \
     pipewire-pulseaudio \
+    pipewire-utils \
     wireplumber \
+    --setopt=install_weak_deps=False
+
+# --- MULTIMEDIA FRAMEWORK ---
+echo "[INFO] -> Instalando plugins de video y compatibilidad web..."
+sudo dnf install -y \
+    gstreamer1-libav \
+    gstreamer1-plugins-bad-free-extras \
+    gstreamer1-plugins-bad-freeworld \
+    gstreamer1-plugins-ugly \
+    --setopt=install_weak_deps=False
+
+# --- CORE SOFTWARE & TERMINAL ---
+echo "[INFO] -> Instalando herramientas de productividad y sistema..."
+sudo dnf install -y \
+    btop \
+    flatpak \
+    gnome-disk-utility \
+    gnome-terminal \
+    gnome-tweaks \
+    kitty \
+    --setopt=install_weak_deps=False
+
+# --- SYSTEM & UX INTEGRATION ---
+echo "[INFO] -> Configurando integracion de escritorio y servicios..."
+sudo dnf install -y \
+    bluez \
+    gnome-keyring \
     xdg-desktop-portal \
     xdg-desktop-portal-gnome \
+    --setopt=install_weak_deps=False
+
+# --- FILESYSTEMS & COMPRESSION ---
+echo "[INFO] -> Soporte para discos externos y archivos comprimidos..."
+sudo dnf install -y \
+    fuse-exfat \
+    ntfs-3g \
+    p7zip \
+    p7zip-plugins \
+    unrar \
+    --setopt=install_weak_deps=False
+
+# --- VISUAL EXPERIENCE (THUMBNAILS & FONTS) ---
+echo "[INFO] -> Renderizado de miniaturas y fuentes base..."
+sudo dnf install -y \
+    ffmpegthumbnailer \
+    gdk-pixbuf2-modules-extra \
+    google-noto-sans-fonts \
+    google-roboto-fonts \
+    librsvg2-tools \
+    --setopt=install_weak_deps=False
+
+# --- LAPTOP HARDWARE & PRINTING ---
+echo "[INFO] -> Optimizacion de energia y servicios de red..."
+sudo dnf install -y \
+    avahi \
+    cups \
+    lm_sensors \
+    nss-mdns \
+    power-profiles-daemon \
     --setopt=install_weak_deps=False
 
 
