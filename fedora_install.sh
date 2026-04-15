@@ -90,6 +90,8 @@ sudo dnf install -y \
     p7zip \
     p7zip-plugins \
     unrar \
+    unzip \
+    zip \
     --setopt=install_weak_deps=False
 
 # --- VISUAL EXPERIENCE (THUMBNAILS & FONTS) ---
@@ -107,10 +109,16 @@ echo "[INFO] -> Optimizacion de energia y servicios de red..."
 sudo dnf install -y \
     avahi \
     cups \
+    cups-filters \
+    firewalld \
     lm_sensors \
     nss-mdns \
     power-profiles-daemon \
     --setopt=install_weak_deps=False
+
+sudo systemctl enable firewalld
+sudo systemctl enable cups
+sudo systemctl enable avahi-daemon
 
 
 # 4. HARDWARE & ESTABILIDAD
