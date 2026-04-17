@@ -193,6 +193,7 @@ install_32bit_compat() {
         vulkan-loader.i686 \
         gamemode \
         gamescope \
+        steam-devices \
         --setopt=install_weak_deps=False --skip-unavailable || {
         echo "[WARN] Fallo parcial en librerías Mesa 32-bit"
     }
