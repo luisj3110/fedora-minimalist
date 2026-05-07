@@ -39,7 +39,7 @@ To keep the system as lean as possible, use the **Fedora Everything ISO** and se
     * Add-ons: Check `Standard` for terminal decorators, colors and bash-completion
     * Add-ons: Check `C Development Tools and Libraries` (This is mandatory for NVIDIA driver compilation).
     * Add-ons: Check `Common NetworkManager Submodules` to ensure stable connectivity for the script.
-2.  **Clone & Prep:**
+    * Add-ons: Check `System Tools`	access to Grubby, disk tools, and log management.
     ```bash
     git clone https://github.com/luisj3110/fedora-minimalist.git
     cd fedora-minimalist
