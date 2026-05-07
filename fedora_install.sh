@@ -76,7 +76,9 @@ sudo dnf install -y \
 echo "[INFO] -> Configurando integracion de escritorio y servicios..."
 sudo dnf install -y \
     bluez \
+    dbus-x11 \
     gnome-keyring \
+    upower \
     xdg-desktop-portal \
     xdg-desktop-portal-gnome \
     --setopt=install_weak_deps=False
