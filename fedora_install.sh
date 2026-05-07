@@ -76,6 +76,7 @@ sudo dnf install -y \
 echo "[INFO] -> Configurando integracion de escritorio y servicios..."
 sudo dnf install -y \
     bluez \
+    fastfetch \
     dbus-x11 \
     gnome-keyring \
     upower \
@@ -252,6 +253,7 @@ flatpak update -y
 
 # 9. LIMPIEZA
 sudo dnf autoremove -y
+sudo dnf remove -y tigervnc-server tigervnc-license
 
 echo "========================"
 echo "INSTALACIÓN COMPLETADA"
