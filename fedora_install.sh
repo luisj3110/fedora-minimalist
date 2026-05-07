@@ -31,10 +31,10 @@ echo "[INFO] -> Instalando base de GNOME..."
 sudo dnf install -y \
     gnome-shell gdm nautilus gnome-control-center \
     gnome-session mutter adwaita-icon-theme gnome-menus gnome-desktop3 \
-    gnome-settings-daemon gvfs-mtp gvfs-archive \
-    xdg-user-dirs-gtk desktop-backgrounds-gnome \
+    gnome-settings-daemon gvfs-mtp gvfs-archive gvfs-smb gvfs-nfs \
+    gnome-disk-utility xdg-user-dirs-gtk desktop-backgrounds-gnome \
     polkit dconf NetworkManager \
-    --setopt=install_weak_deps=False --skip-unavailable
+    --skip-unavailable
 
 
 # 3. MULTIMEDIA & UX
@@ -68,7 +68,6 @@ sudo dnf install -y \
     btop \
     flatpak \
     gnome-disk-utility \
-    gnome-terminal \
     gnome-tweaks \
     kitty \
     --setopt=install_weak_deps=False
@@ -159,6 +158,8 @@ install_nvidia() {
         mesa-dri-drivers vulkan-loader vulkan-tools \
         --skip-unavailable
 
+    sudo grubby --update-kernel=ALL --args="nvidia-drm.modeset=1"
+
     echo "[INFO] -> Iniciando compilación de módulos..."
     sudo akmods --akmod nvidia
     
@@ -240,6 +241,10 @@ flatpak install flathub -y \
     org.gnome.Decibels \
     com.mattjakeman.ExtensionManager \
     net.nokyan.Resources
+
+# Permite que los Flatpaks lean la configuración de temas del host
+sudo flatpak override --filesystem=xdg-config/gtk-4.0:ro
+sudo flatpak override --filesystem=xdg-config/gtk-3.0:ro
 
 flatpak update -y
 
