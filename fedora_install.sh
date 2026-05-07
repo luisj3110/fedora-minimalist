@@ -115,7 +115,7 @@ sudo dnf install -y \
     lm_sensors \
     nss-mdns \
     power-profiles-daemon \
-    --setopt=install_weak_deps=False
+    --allowerasing --setopt=install_weak_deps=False
 
 # --- SEGURIDAD & RED ---
 echo "[INFO] -> Configurando seguridad y servicios de red..."
