@@ -252,8 +252,8 @@ sudo flatpak override --filesystem=xdg-config/gtk-3.0:ro
 flatpak update -y
 
 # 9. LIMPIEZA
-sudo dnf autoremove -y
 sudo dnf remove -y tigervnc-server tigervnc-license
+sudo dnf autoremove -y
 
 echo "========================"
 echo "INSTALACIÓN COMPLETADA"
