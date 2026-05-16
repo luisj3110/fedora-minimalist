@@ -171,9 +171,16 @@ install_nvidia() {
 
     echo "[INFO] -> Instalando drivers NVIDIA..."
     sudo dnf install -y \
-        akmod-nvidia xorg-x11-drv-nvidia-cuda nvidia-settings \
-        libva-nvidia-driver kernel-devel kernel-headers xorg-x11-server-Xwayland \
-        mesa-dri-drivers vulkan-loader vulkan-tools \
+        akmod-nvidia \
+        xorg-x11-drv-nvidia-cuda \
+        nvidia-settings \
+        libva-nvidia-driver\
+        kernel-devel \
+        kernel-headers \
+        xorg-x11-server-Xwayland \
+        mesa-dri-drivers \
+        vulkan-loader \
+        vulkan-tools \
         --skip-unavailable
 
     sudo grubby --update-kernel=ALL --args="nvidia-drm.modeset=1"
