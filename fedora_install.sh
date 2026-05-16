@@ -251,6 +251,30 @@ sudo flatpak override --filesystem=xdg-config/gtk-3.0:ro
 
 flatpak update -y
 
+#PLYMOUTH SPLASH SCREEN CONFIGURATION
+configure_plymouth_splash() {
+    echo "[INFO] -> Iniciando la configuración del Splash Screen..."
+
+    echo "[INFO] -> Instalando componentes de Plymouth..."
+    sudo dnf install -y \
+        plymouth \
+        plymouth-system-theme \
+        plymouth-graphics-libs \
+        --setopt=install_weak_deps=False
+
+    echo "[INFO] -> Inyectando parámetros del kernel (rhgb quiet) vía grubby..."
+    sudo grubby --update-kernel=ALL --args="rhgb quiet"
+
+    echo "[INFO] -> Estableciendo tema 'bgrt' y regenerando initramfs..."
+    if sudo plymouth-set-default-theme bgrt -R; then
+        echo "[SUCCESS] -> Tema aplicado y ramdisk actualizado exitosamente por Plymouth."
+    else
+        echo "[WARNING] -> El comando nativo falló. Forzando regeneración manual de la estructura de arranque con dracut..."
+        sudo dracut -f --regenerate-all
+        echo "[SUCCESS] -> Initramfs reconstruido mediante dracut."
+    fi
+}
+
 # 9. LIMPIEZA
 sudo dnf remove -y tigervnc-server tigervnc-license
 sudo dnf autoremove -y
