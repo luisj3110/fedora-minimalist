@@ -228,9 +228,15 @@ configure_plymouth_splash
 
 # 7. LIBRERÍAS & TABLETAS GRÁFICAS
 sudo dnf install -y \
-    libwacom xorg-x11-drv-wacom \
-    libX11 libXcursor libXi libXrandr mesa-libGLU \
-    libxkbcommon libxkbcommon-x11 \
+    libwacom\
+    xorg-x11-drv-wacom \
+    libX11 \
+    libXcursor \
+    libXi \
+    libXrandr \
+    mesa-libGLU \
+    libxkbcommon \
+    libxkbcommon-x11 \
     --setopt=install_weak_deps=False --skip-unavailable
 
 # COMPATIBILIDAD 32-BIT (GAMING)
