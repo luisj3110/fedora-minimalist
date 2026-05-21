@@ -10,12 +10,20 @@ echo "=================================================="
 echo "FEDORA MINIMALIST INSTALLER  (By KKmole69)"
 echo "=================================================="
 
-# 1. DNF OPTIMIZATION
+# 1. OPTIMIZACIÓN DNF
 echo "[INFO] -> Optimizando configuración de DNF..."
+# Limpiar configuraciones previas para evitar duplicados
 sudo sed -i '/max_parallel_downloads/d' /etc/dnf/dnf.conf
+sudo sed -i '/max_downloads_per_mirror/d' /etc/dnf/dnf.conf
 sudo sed -i '/fastestmirror/d' /etc/dnf/dnf.conf
+sudo sed -i '/minrate/d' /etc/dnf/dnf.conf
+sudo sed -i '/timeout/d' /etc/dnf/dnf.conf
+
 echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf
-echo "fastestmirror=True" | sudo tee -a /etc/dnf/dnf.conf
+echo "max_downloads_per_mirror=10" | sudo tee -a /etc/dnf/dnf.conf
+echo "fastestmirror=False" | sudo tee -a /etc/dnf/dnf.conf
+echo "minrate=1M" | sudo tee -a /etc/dnf/dnf.conf
+echo "timeout=5" | sudo tee -a /etc/dnf/dnf.conf
 
 echo "[INFO] -> Configurando repositorios RPM Fusion..."
 sudo dnf install -y \
@@ -166,29 +174,42 @@ sudo systemctl set-default graphical.target
 
 # 6. STACK GRÁFICO (NVIDIA)
 install_nvidia() {
-    echo "[INFO] -> Refrescando metadatos..."
+    echo "[INFO] -> Refrescando metadatos e instalando drivers NVIDIA..."
     sudo dnf makecache
-
-    echo "[INFO] -> Instalando drivers NVIDIA..."
     sudo dnf install -y \
         akmod-nvidia \
         xorg-x11-drv-nvidia-cuda \
         nvidia-settings \
-        libva-nvidia-driver\
+        libva-nvidia-driver \
         kernel-devel \
         kernel-headers \
         xorg-x11-server-Xwayland \
         mesa-dri-drivers \
         vulkan-loader \
         vulkan-tools \
+        switcheroo-control \
         --skip-unavailable
 
-    sudo grubby --update-kernel=ALL --args="nvidia-drm.modeset=1"
+    # 1. Parámetros del Kernel para Wayland
+    echo "[INFO] -> Configurando Kernel: Modesetting y FBDEV para Wayland..."
+    sudo grubby --update-kernel=ALL --args="nvidia-drm.modeset=1 nvidia-drm.fbdev=1"
 
-    echo "[INFO] -> Iniciando compilación de módulos..."
+    # 2. Preservación de memoria de video (Evita crasheos al suspender)
+    echo "[INFO] -> Habilitando preservación de VRAM para suspensión segura..."
+    echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/modprobe.d/nvidia-power-management.conf
+
+    # 3. Servicios de energía de NVIDIA
+    echo "[INFO] -> Activando servicios Systemd para Suspend/Hibernate..."
+    sudo systemctl enable nvidia-suspend.service
+    sudo systemctl enable nvidia-hibernate.service
+    sudo systemctl enable nvidia-resume.service
+
+    # 4. Soporte para gráficos hibridos
+    echo "[INFO] -> Habilitando Switcheroo Control para gráficos híbridos..."
+    sudo systemctl enable --now switcheroo-control.service
+
+    echo "[INFO] -> Iniciando compilación de módulos y sincronizando kernel..."
     sudo akmods --akmod nvidia
-    
-    echo "[INFO] -> Sincronizando kernel (Initramfs)..."
     sudo dracut --force --verbose
 }
 
