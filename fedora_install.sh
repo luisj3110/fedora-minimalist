@@ -140,14 +140,17 @@ sudo firewall-cmd --set-default-zone=public
 
 sudo firewall-cmd --permanent --zone=home --add-service=mdns
 
-sudo cupsctl --no-remote-any --no-remote-admin --no-share-printers
-
 sudo firewall-cmd --reload
 
-sudo systemctl enable avahi-daemon
-sudo systemctl enable cups
+sudo systemctl enable --now cups
+
+sudo cupsctl --no-remote-any --no-remote-admin --no-share-printers
+
+sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now fwupd.service
 sudo systemctl enable --now fstrim.timer
+
+
 
 # 9. AMD iGPU (Ryzen 5 4600H — Radeon Vega)
 sudo dnf install -y \
