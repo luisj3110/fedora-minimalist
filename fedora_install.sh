@@ -93,13 +93,12 @@ sudo dnf install -y \
     gnome-bluetooth \
     fastfetch \
     upower \
-    power-profiles-daemon \
     xdg-desktop-portal \
     xdg-desktop-portal-gnome \
     --setopt=install_weak_deps=False --skip-unavailable
 
 sudo systemctl enable --now bluetooth.service
-sudo systemctl enable --now power-profiles-daemon.service
+sudo systemctl enable --now tuned.service
 
 # 6. FILESYSTEMS & COMPRESSION
 sudo dnf install -y \
