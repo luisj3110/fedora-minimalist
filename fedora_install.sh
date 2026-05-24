@@ -1,41 +1,27 @@
 #!/bin/bash
 set -euo pipefail
 
-# LOGGING
 LOG_FILE="install.log"
 exec > >(tee -i "$LOG_FILE")
 exec 2>&1
 
-echo "=================================================="
-echo "FEDORA MINIMALIST INSTALLER  (By KKmole69)"
-echo "=================================================="
+echo "FEDORA MINIMALIST INSTALLER"
 
-# 1. OPTIMIZACIÓN DNF
-echo "[INFO] -> Optimizando configuración de DNF..."
-# Limpiar configuraciones previas para evitar duplicados
-sudo sed -i '/max_parallel_downloads/d' /etc/dnf/dnf.conf
-sudo sed -i '/max_downloads_per_mirror/d' /etc/dnf/dnf.conf
-sudo sed -i '/fastestmirror/d' /etc/dnf/dnf.conf
-sudo sed -i '/minrate/d' /etc/dnf/dnf.conf
-sudo sed -i '/timeout/d' /etc/dnf/dnf.conf
+# 1. DNF 
+sudo sed -i -E '/^(max_parallel_downloads|max_downloads_per_mirror|fastestmirror|minrate|timeout)=/d' \
+    /etc/dnf/dnf.conf
 
-echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf
-echo "max_downloads_per_mirror=10" | sudo tee -a /etc/dnf/dnf.conf
-echo "fastestmirror=False" | sudo tee -a /etc/dnf/dnf.conf
-echo "minrate=1M" | sudo tee -a /etc/dnf/dnf.conf
-echo "timeout=5" | sudo tee -a /etc/dnf/dnf.conf
+printf 'max_parallel_downloads=10\nfastestmirror=True\nminrate=1M\ntimeout=30\n' \
+    | sudo tee -a /etc/dnf/dnf.conf
 
-echo "[INFO] -> Configurando repositorios RPM Fusion..."
 sudo dnf install -y \
     https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
     https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
 sudo dnf makecache --refresh
-
 sudo dnf upgrade -y
 
-# 2. SISTEMA BASE
-echo "[INFO] -> Instalando base de GNOME..."
+# 2. GNOME BASE
 sudo dnf install -y \
     gnome-shell \
     gdm \
@@ -44,29 +30,40 @@ sudo dnf install -y \
     gnome-session \
     mutter \
     adwaita-icon-theme \
+    adwaita-cursor-theme \
     gnome-menus \
     gnome-desktop3 \
+    gnome-desktop4 \
     gnome-settings-daemon \
+    gsettings-desktop-schemas \
+    gvfs \
     gvfs-mtp \
     gvfs-archive \
     gvfs-smb \
     gvfs-nfs \
     gnome-disk-utility \
     xdg-user-dirs-gtk \
+    xdg-utils \
     desktop-backgrounds-gnome \
     polkit \
+    polkit-gnome \
     dconf \
     NetworkManager \
+    nm-connection-editor \
+    glib-networking \
+    libsecret \
+    gnome-keyring \
+    libnotify \
+    xorg-x11-server-Xwayland \
+    colord \
+    colord-gtk \
     --skip-unavailable
 
+sudo systemctl enable --now NetworkManager
 
-# 3. MULTIMEDIA & UX
-echo "[INFO] -> Instalando motores de software y audio..."
-# AUDIO & CODECS
-echo "[INFO] -> Configurando motor de audio y codecs..."
+# 3. AUDIO & CODECS
 sudo dnf swap -y ffmpeg-free ffmpeg --allowerasing
 sudo dnf install -y \
-    libldac \
     pipewire \
     pipewire-alsa \
     pipewire-codec-aptx \
@@ -74,41 +71,37 @@ sudo dnf install -y \
     pipewire-pulseaudio \
     pipewire-utils \
     wireplumber \
-    --setopt=install_weak_deps=False
-
-# --- MULTIMEDIA FRAMEWORK ---
-echo "[INFO] -> Instalando plugins de video y compatibilidad web..."
-sudo dnf install -y \
+    libldac \
     gstreamer1-libav \
     gstreamer1-plugins-bad-free-extras \
     gstreamer1-plugins-bad-freeworld \
     gstreamer1-plugins-ugly \
     --setopt=install_weak_deps=False
 
-# --- CORE SOFTWARE & TERMINAL ---
-echo "[INFO] -> Instalando herramientas de productividad y sistema..."
+# 4. CORE TOOLS
 sudo dnf install -y \
     btop \
     flatpak \
-    gnome-disk-utility \
     gnome-tweaks \
     kitty \
+    gnome-disk-utility \
     --setopt=install_weak_deps=False
 
-# --- SYSTEM & UX INTEGRATION ---
-echo "[INFO] -> Configurando integracion de escritorio y servicios..."
+# 5. SYSTEM INTEGRATION
 sudo dnf install -y \
     bluez \
+    gnome-bluetooth \
     fastfetch \
-    dbus-x11 \
-    gnome-keyring \
     upower \
+    power-profiles-daemon \
     xdg-desktop-portal \
     xdg-desktop-portal-gnome \
-    --setopt=install_weak_deps=False
+    --setopt=install_weak_deps=False --skip-unavailable
 
-# --- FILESYSTEMS & COMPRESSION ---
-echo "[INFO] -> Soporte para discos externos y archivos comprimidos..."
+sudo systemctl enable --now bluetooth.service
+sudo systemctl enable --now power-profiles-daemon.service
+
+# 6. FILESYSTEMS & COMPRESSION
 sudo dnf install -y \
     fuse-exfat \
     ntfs-3g \
@@ -119,8 +112,7 @@ sudo dnf install -y \
     zip \
     --setopt=install_weak_deps=False
 
-# --- VISUAL EXPERIENCE (THUMBNAILS & FONTS) ---
-echo "[INFO] -> Renderizado de miniaturas y fuentes base..."
+# 7. VISUAL & FONTS
 sudo dnf install -y \
     ffmpegthumbnailer \
     gdk-pixbuf2-modules-extra \
@@ -129,8 +121,7 @@ sudo dnf install -y \
     librsvg2-tools \
     --setopt=install_weak_deps=False
 
-# --- LAPTOP HARDWARE & PRINTING ---
-echo "[INFO] -> Optimizacion de energia y servicios de red..."
+# 8. HARDWARE, PRINTING & SECURITY
 sudo dnf install -y \
     avahi \
     cups \
@@ -138,119 +129,106 @@ sudo dnf install -y \
     firewalld \
     lm_sensors \
     nss-mdns \
-    power-profiles-daemon \
-    --allowerasing --setopt=install_weak_deps=False
-
-# --- SEGURIDAD & RED ---
-echo "[INFO] -> Configurando seguridad y servicios de red..."
-sudo dnf install -y \
     openssl \
     ca-certificates \
-    --setopt=install_weak_deps=False
+    amd-ucode-firmware \
+    fwupd \
+    --allowerasing --setopt=install_weak_deps=False
 
 sudo systemctl enable --now firewalld
 
-sudo firewall-cmd --permanent --add-port=631/tcp
-sudo firewall-cmd --permanent --add-port=631/udp
-sudo firewall-cmd --permanent --add-service=mdns
 sudo firewall-cmd --set-default-zone=public
 
+sudo firewall-cmd --permanent --zone=home --add-service=mdns
+
+sudo cupsctl --no-remote-any --no-remote-admin --no-share-printers
+
 sudo firewall-cmd --reload
+
 sudo systemctl enable avahi-daemon
 sudo systemctl enable cups
+sudo systemctl enable --now fwupd.service
+sudo systemctl enable --now fstrim.timer
 
+# 9. AMD iGPU (Ryzen 5 4600H — Radeon Vega)
+sudo dnf install -y \
+    mesa-dri-drivers \
+    mesa-vulkan-drivers \
+    libva-mesa-driver \
+    mesa-va-drivers \
+    --setopt=install_weak_deps=False
 
-
-# 4. HARDWARE & ESTABILIDAD
-echo "[INFO] -> Microcódigo y soporte de energía..."
-sudo dnf install -y amd-ucode-firmware fwupd --setopt=install_weak_deps=False
-
-sudo systemctl enable --now fwupd.service fstrim.timer
-sudo systemctl enable --now bluetooth.service
-
-# 5. ACTIVAR INTERFAZ
+# 10. DISPLAY & INTERFACE
 sudo systemctl enable gdm
 sudo systemctl set-default graphical.target
 
-# 6. STACK GRÁFICO (NVIDIA)
+# 11. NVIDIA
 install_nvidia() {
-    echo "[INFO] -> Refrescando metadatos e instalando drivers NVIDIA..."
     sudo dnf makecache
     sudo dnf install -y \
         akmod-nvidia \
-        xorg-x11-drv-nvidia-cuda \
-        nvidia-settings \
-        libva-nvidia-driver \
         kernel-devel \
         kernel-headers \
-        xorg-x11-server-Xwayland \
-        mesa-dri-drivers \
+        libva-nvidia-driver \
+        nvidia-modprobe \
+        nvidia-settings \
+        nvidia-vaapi-driver \
+        switcheroo-control \
         vulkan-loader \
         vulkan-tools \
-        switcheroo-control \
+        xorg-x11-drv-nvidia-cuda \
+        xorg-x11-drv-nvidia-power \
         --skip-unavailable
 
-    # 1. Parámetros del Kernel para Wayland
-    echo "[INFO] -> Configurando Kernel: Modesetting y FBDEV para Wayland..."
     sudo grubby --update-kernel=ALL --args="nvidia-drm.modeset=1 nvidia-drm.fbdev=1"
 
-    # 2. Preservación de memoria de video (Evita crasheos al suspender)
-    echo "[INFO] -> Habilitando preservación de VRAM para suspensión segura..."
-    echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1" | sudo tee /etc/modprobe.d/nvidia-power-management.conf
+    echo "options nvidia-drm modeset=1 fbdev=1" \
+        | sudo tee /etc/modprobe.d/nvidia-drm.conf
 
-    # 3. Servicios de energía de NVIDIA
-    echo "[INFO] -> Activando servicios Systemd para Suspend/Hibernate..."
+    echo "options nvidia NVreg_PreserveVideoMemoryAllocations=1 NVreg_DynamicPowerManagement=0x02" \
+        | sudo tee /etc/modprobe.d/nvidia-power-management.conf
+
     sudo systemctl enable nvidia-suspend.service
     sudo systemctl enable nvidia-hibernate.service
     sudo systemctl enable nvidia-resume.service
 
-    # 4. Soporte para gráficos hibridos
-    echo "[INFO] -> Habilitando Switcheroo Control para gráficos híbridos..."
+    sudo systemctl enable --now nvidia-powerd.service
+
     sudo systemctl enable --now switcheroo-control.service
 
-    echo "[INFO] -> Iniciando compilación de módulos y sincronizando kernel..."
-    sudo akmods --akmod nvidia
-    sudo dracut --force --verbose
+    echo "Attempting NVIDIA module compilation (may take 5-10 min)..."
+    sudo akmods --akmod nvidia || \
+        echo "akmods compilation deferred to first boot."
 }
 
-#PLYMOUTH SPLASH SCREEN CONFIGURATION
+# 12. PLYMOUTH
 configure_plymouth_splash() {
-    echo "[INFO] -> Iniciando la configuración del Splash Screen..."
-
-    echo "[INFO] -> Instalando componentes de Plymouth..."
     sudo dnf install -y \
         plymouth \
         plymouth-system-theme \
         plymouth-graphics-libs \
         --setopt=install_weak_deps=False
 
-    echo "[INFO] -> Inyectando parámetros del kernel (rhgb quiet) vía grubby..."
     sudo grubby --update-kernel=ALL --args="rhgb quiet"
 
-    echo "[INFO] -> Estableciendo tema 'bgrt' y regenerando initramfs..."
-    if sudo plymouth-set-default-theme bgrt -R; then
-        echo "[SUCCESS] -> Tema aplicado y ramdisk actualizado exitosamente por Plymouth."
-    else
-        echo "[WARNING] -> El comando nativo falló. Forzando regeneración manual de la estructura de arranque con dracut..."
+    if ! sudo plymouth-set-default-theme bgrt -R; then
         sudo dracut -f --regenerate-all
-        echo "[SUCCESS] -> Initramfs reconstruido mediante dracut."
     fi
 }
 
 if lspci -nn | grep -qi nvidia; then
     install_nvidia
 else
-    echo "No se detectó una GPU NVIDIA..."
-    read -p "¿Deseas instalar los drivers de NVIDIA de todas formas? (y/n): " force_nv
+    echo "No NVIDIA GPU detected."
+    read -p "Force NVIDIA driver install? (y/n): " force_nv
     [[ "$force_nv" =~ ^[Yy]$ ]] && install_nvidia
 fi
 
 configure_plymouth_splash
 
-# 7. LIBRERÍAS & TABLETAS GRÁFICAS
+# 13. TABLET & GRAPHICS LIBS
 sudo dnf install -y \
-    libwacom\
-    xorg-x11-drv-wacom \
+    libwacom \
     libX11 \
     libXcursor \
     libXi \
@@ -260,57 +238,42 @@ sudo dnf install -y \
     libxkbcommon-x11 \
     --setopt=install_weak_deps=False --skip-unavailable
 
-# COMPATIBILIDAD 32-BIT (GAMING)
+# 14. 32-BIT COMPAT (GAMING)
 install_32bit_compat() {
-    echo "[INFO] -> Instalando librerías 32-bit y compatibilidad con juegos..."
-
-    # Base OpenGL / Mesa 32-bit
     sudo dnf install -y \
         mesa-dri-drivers.i686 \
         mesa-libGL.i686 \
+        libglvnd.i686 \
         libglvnd-glx.i686 \
+        libglvnd-egl.i686 \
         vulkan-loader.i686 \
+        pipewire-alsa.i686 \
         gamemode \
         gamescope \
         steam-devices \
-        --setopt=install_weak_deps=False --skip-unavailable || {
-        echo "[WARN] Fallo parcial en librerías Mesa 32-bit"
-    }
+        --setopt=install_weak_deps=False --skip-unavailable || \
+        echo "WARN: partial failure on 32-bit libs"
 
-    # Si hay NVIDIA, se añade el soporte para 32-bit
     if lspci -nn | grep -qi nvidia; then
-        echo "[INFO] -> Detectada GPU NVIDIA, instalando librerías 32-bit correspondientes..."
-
         sudo dnf install -y \
             xorg-x11-drv-nvidia-libs.i686 \
-            --skip-unavailable || {
-            echo "[WARN] No se pudieron instalar librerías NVIDIA 32-bit"
-        }
-    else
-        echo "[INFO] -> No se detectó NVIDIA, usando stack Mesa 32-bit"
+            --skip-unavailable || \
+            echo "WARN: NVIDIA 32-bit libs install failed"
     fi
-
-    echo "[INFO] -> Compatibilidad 32-bit y paquetes gaming instalados correctamente"
 }
 
-# Pregunta interactiva
-read -p "¿Desea instalar compatibilidad para juegos y librerías 32-bit? (Steam/Wine, Vulkan 32-bit, GameMode, Gamescope) (y/n): " choice
+read -p "Install 32-bit gaming compat (Steam/Wine/Vulkan/GameMode/Gamescope)? (y/n): " choice
 if [[ "$choice" =~ ^[Yy]$ ]]; then
     install_32bit_compat
 else
-    echo "[INFO] -> Se omitió la compatibilidad para juegos y librerías 32-bit"
+    echo "32-bit compat skipped."
 fi
 
+# 15. FLATPAK
+flatpak remote-add --user --if-not-exists flathub \
+    https://flathub.org/repo/flathub.flatpakrepo
 
-# 8. APPS & PERSONALIZACIÓN
-if ! command -v flatpak &> /dev/null; then
-    echo "[RETRY] Flatpak no encontrado. Intentando instalar nuevamente..."
-    sudo dnf install -y flatpak
-fi
-
-echo "[INFO] -> Instalando aplicaciones..."
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install flathub -y \
+flatpak install --user flathub -y \
     com.brave.Browser \
     org.gnome.Showtime \
     org.gnome.Loupe \
@@ -320,19 +283,16 @@ flatpak install flathub -y \
     com.mattjakeman.ExtensionManager \
     net.nokyan.Resources
 
-# Permite que los Flatpaks lean la configuración de temas del host
-sudo flatpak override --filesystem=xdg-config/gtk-4.0:ro
-sudo flatpak override --filesystem=xdg-config/gtk-3.0:ro
+flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
+flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
 
-flatpak update -y
+flatpak update --user -y
 
-# 9. LIMPIEZA
-sudo dnf remove -y tigervnc-server tigervnc-license
+# 16. CLEANUP
+sudo dnf remove -y tigervnc-server tigervnc-license 2>/dev/null || true
 sudo dnf autoremove -y
 
-echo "========================"
-echo "INSTALACIÓN COMPLETADA"
-echo "========================"
+echo "INSTALLATION COMPLETE"
 
-read -p "¿Reiniciar ahora? (y/n): " choice
+read -p "Reboot now? (y/n): " choice
 [[ "$choice" =~ ^[Yy]$ ]] && reboot
