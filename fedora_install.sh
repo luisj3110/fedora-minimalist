@@ -156,7 +156,6 @@ sudo systemctl enable --now fstrim.timer
 sudo dnf install -y \
     mesa-dri-drivers \
     mesa-vulkan-drivers \
-    libva-mesa-driver \
     mesa-va-drivers \
     --setopt=install_weak_deps=False
 
