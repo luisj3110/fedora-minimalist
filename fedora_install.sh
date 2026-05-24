@@ -271,23 +271,28 @@ else
 fi
 
 # 15. FLATPAK
-flatpak remote-add --user --if-not-exists flathub \
+sudo flatpak remote-add --system --if-not-exists flathub \
     https://flathub.org/repo/flathub.flatpakrepo
 
-flatpak install --user flathub -y \
-    com.brave.Browser \
-    org.gnome.Showtime \
-    org.gnome.Loupe \
-    org.gnome.Calculator \
-    org.gnome.TextEditor \
-    org.gnome.Decibels \
-    com.mattjakeman.ExtensionManager \
-    net.nokyan.Resources
+APPS=(
+    "com.brave.Browser"
+    "org.gnome.Showtime"
+    "org.gnome.Loupe"
+    "org.gnome.Calculator"
+    "org.gnome.TextEditor"
+    "org.gnome.Decibels"
+    "com.mattjakeman.ExtensionManager"
+    "net.nokyan.Resources"
+)
 
-flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
-flatpak override --user --filesystem=xdg-config/gtk-3.0:ro
+for app in "${APPS[@]}"; do
+    echo "Instalando $app..."
+    sudo flatpak install --system -y flathub "$app" || echo "Advertencia: Falló la instalación de $app"
+done
 
-flatpak update --user -y
+sudo flatpak override --system --filesystem=xdg-config/gtk-4.0:ro
+sudo flatpak override --system --filesystem=xdg-config/gtk-3.0:ro
+sudo flatpak update --system -y
 
 # 16. CLEANUP
 sudo dnf remove -y tigervnc-server tigervnc-license 2>/dev/null || true
