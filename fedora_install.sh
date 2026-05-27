@@ -7,7 +7,7 @@ exec 2>&1
 
 echo "FEDORA MINIMALIST INSTALLER"
 
-# 1. DNF 
+# 1. DNF
 sudo sed -i -E '/^(max_parallel_downloads|max_downloads_per_mirror|fastestmirror|minrate|timeout)=/d' \
     /etc/dnf/dnf.conf
 
@@ -21,42 +21,9 @@ sudo dnf install -y \
 sudo dnf makecache --refresh
 sudo dnf upgrade -y
 
-# 2. GNOME BASE
+# 2. GNOME BASE 
 sudo dnf install -y \
-    gnome-shell \
-    gdm \
-    nautilus \
-    gnome-control-center \
-    gnome-session \
-    mutter \
-    adwaita-icon-theme \
-    adwaita-cursor-theme \
-    gnome-menus \
-    gnome-desktop3 \
-    gnome-desktop4 \
-    gnome-settings-daemon \
-    gsettings-desktop-schemas \
-    gvfs \
-    gvfs-mtp \
-    gvfs-archive \
-    gvfs-smb \
-    gvfs-nfs \
-    gnome-disk-utility \
-    xdg-user-dirs-gtk \
-    xdg-utils \
-    desktop-backgrounds-gnome \
-    polkit \
-    polkit-gnome \
-    dconf \
-    NetworkManager \
-    nm-connection-editor \
-    glib-networking \
-    libsecret \
-    gnome-keyring \
-    libnotify \
-    xorg-x11-server-Xwayland \
-    colord \
-    colord-gtk \
+    @gnome-desktop \
     --skip-unavailable
 
 sudo systemctl enable --now NetworkManager
@@ -64,18 +31,16 @@ sudo systemctl enable --now NetworkManager
 # 3. AUDIO & CODECS
 sudo dnf swap -y ffmpeg-free ffmpeg --allowerasing
 sudo dnf install -y \
-    pipewire \
-    pipewire-alsa \
-    pipewire-codec-aptx \
-    pipewire-gstreamer \
-    pipewire-pulseaudio \
-    pipewire-utils \
-    wireplumber \
-    libldac \
+    alsa-utils \
     gstreamer1-libav \
     gstreamer1-plugins-bad-free-extras \
     gstreamer1-plugins-bad-freeworld \
+    gstreamer1-plugins-good \
     gstreamer1-plugins-ugly \
+    libldac \
+    pipewire-codec-aptx \
+    pipewire-jack \
+    pipewire-utils \
     --setopt=install_weak_deps=False
 
 # 4. CORE TOOLS
@@ -84,21 +49,15 @@ sudo dnf install -y \
     flatpak \
     gnome-tweaks \
     kitty \
-    gnome-disk-utility \
     --setopt=install_weak_deps=False
 
 # 5. SYSTEM INTEGRATION
 sudo dnf install -y \
-    bluez \
-    gnome-bluetooth \
     fastfetch \
-    upower \
-    xdg-desktop-portal \
-    xdg-desktop-portal-gnome \
     --setopt=install_weak_deps=False --skip-unavailable
 
 sudo systemctl enable --now bluetooth.service
-sudo systemctl enable --now tuned.service
+sudo systemctl enable --now power-profiles-daemon.service
 
 # 6. FILESYSTEMS & COMPRESSION
 sudo dnf install -y \
@@ -135,35 +94,28 @@ sudo dnf install -y \
     --allowerasing --setopt=install_weak_deps=False
 
 sudo systemctl enable --now firewalld
-
 sudo firewall-cmd --set-default-zone=public
-
 sudo firewall-cmd --permanent --zone=home --add-service=mdns
-
 sudo firewall-cmd --reload
 
 sudo systemctl enable --now cups
-
 sudo cupsctl --no-remote-any --no-remote-admin --no-share-printers
-
 sudo systemctl enable --now avahi-daemon
 sudo systemctl enable --now fwupd.service
 sudo systemctl enable --now fstrim.timer
 
-
-
 # 9. AMD iGPU (Ryzen 5 4600H — Radeon Vega)
 sudo dnf install -y \
-    mesa-dri-drivers \
-    mesa-vulkan-drivers \
+    libva-mesa-driver \
     mesa-va-drivers \
+    mesa-vulkan-drivers \
     --setopt=install_weak_deps=False
 
 # 10. DISPLAY & INTERFACE
 sudo systemctl enable gdm
 sudo systemctl set-default graphical.target
 
-# 11. NVIDIA
+# 11. NVIDIA 
 install_nvidia() {
     sudo dnf makecache
     sudo dnf install -y \
@@ -176,7 +128,6 @@ install_nvidia() {
         nvidia-vaapi-driver \
         switcheroo-control \
         vulkan-loader \
-        vulkan-tools \
         xorg-x11-drv-nvidia-cuda \
         xorg-x11-drv-nvidia-power \
         --skip-unavailable
@@ -192,9 +143,7 @@ install_nvidia() {
     sudo systemctl enable nvidia-suspend.service
     sudo systemctl enable nvidia-hibernate.service
     sudo systemctl enable nvidia-resume.service
-
     sudo systemctl enable --now nvidia-powerd.service
-
     sudo systemctl enable --now switcheroo-control.service
 
     echo "Attempting NVIDIA module compilation (may take 5-10 min)..."
@@ -230,28 +179,22 @@ configure_plymouth_splash
 # 13. TABLET & GRAPHICS LIBS
 sudo dnf install -y \
     libwacom \
-    libX11 \
-    libXcursor \
-    libXi \
-    libXrandr \
     mesa-libGLU \
-    libxkbcommon \
-    libxkbcommon-x11 \
     --setopt=install_weak_deps=False --skip-unavailable
 
 # 14. 32-BIT COMPAT (GAMING)
 install_32bit_compat() {
     sudo dnf install -y \
-        mesa-dri-drivers.i686 \
-        mesa-libGL.i686 \
-        libglvnd.i686 \
-        libglvnd-glx.i686 \
-        libglvnd-egl.i686 \
-        vulkan-loader.i686 \
-        pipewire-alsa.i686 \
         gamemode \
         gamescope \
+        libglvnd-egl.i686 \
+        libglvnd-glx.i686 \
+        libglvnd.i686 \
+        mesa-dri-drivers.i686 \
+        mesa-libGL.i686 \
+        pipewire-alsa.i686 \
         steam-devices \
+        vulkan-loader.i686 \
         --setopt=install_weak_deps=False --skip-unavailable || \
         echo "WARN: partial failure on 32-bit libs"
 
@@ -270,31 +213,39 @@ else
     echo "32-bit compat skipped."
 fi
 
-# 15. FLATPAK
+# 15. MEMORY PRESSURE MANAGEMENT
+sudo dnf install -y zram-generator --setopt=install_weak_deps=False
+
+sudo tee /etc/systemd/zram-generator.conf > /dev/null << 'EOF'
+[zram0]
+zram-size = ram / 2
+compression-algorithm = zstd
+EOF
+
+sudo systemctl enable --now systemd-oomd.service
+sudo systemctl daemon-reexec
+sudo systemctl start /dev/zram0 2>/dev/null || true
+
+# 16. FLATPAK
 sudo flatpak remote-add --system --if-not-exists flathub \
     https://flathub.org/repo/flathub.flatpakrepo
 
 APPS=(
     "com.brave.Browser"
-    "org.gnome.Showtime"
-    "org.gnome.Loupe"
-    "org.gnome.Calculator"
-    "org.gnome.TextEditor"
-    "org.gnome.Decibels"
     "com.mattjakeman.ExtensionManager"
-    "net.nokyan.Resources"
 )
 
 for app in "${APPS[@]}"; do
-    echo "Instalando $app..."
-    sudo flatpak install --system -y flathub "$app" || echo "Advertencia: Falló la instalación de $app"
+    echo "Installing $app..."
+    sudo flatpak install --system -y flathub "$app" || \
+        echo "WARN: Failed to install $app"
 done
 
 sudo flatpak override --system --filesystem=xdg-config/gtk-4.0:ro
 sudo flatpak override --system --filesystem=xdg-config/gtk-3.0:ro
 sudo flatpak update --system -y
 
-# 16. CLEANUP
+# 17. CLEANUP
 sudo dnf remove -y tigervnc-server tigervnc-license 2>/dev/null || true
 sudo dnf autoremove -y
 
