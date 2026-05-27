@@ -39,7 +39,7 @@ sudo dnf install -y \
     gstreamer1-plugins-ugly \
     libldac \
     pipewire-codec-aptx \
-    pipewire-jack \
+    pipewire-jack-audio-connection-kit \
     pipewire-utils \
     --setopt=install_weak_deps=False
 
