@@ -54,11 +54,10 @@ sudo dnf install -y \
 # 5. SYSTEM INTEGRATION
 sudo dnf install -y \
     fastfetch \
-    power-profiles-daemon \
     --setopt=install_weak_deps=False --skip-unavailable
 
 sudo systemctl enable --now bluetooth.service
-sudo systemctl enable --now power-profiles-daemon.service
+sudo systemctl enable --now tuned.service
 
 # 6. FILESYSTEMS & COMPRESSION
 sudo dnf install -y \
