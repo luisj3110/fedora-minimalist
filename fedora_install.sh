@@ -100,13 +100,12 @@ sudo firewall-cmd --reload
 
 sudo systemctl enable --now cups
 sudo cupsctl --no-remote-any --no-remote-admin --no-share-printers
-sudo systemctl enable --now avahi-daemon
+sudo systemctl enable --now avahi-daemon.socket
 sudo systemctl enable --now fwupd.service
 sudo systemctl enable --now fstrim.timer
 
 # 9. AMD iGPU (Ryzen 5 4600H — Radeon Vega)
 sudo dnf install -y \
-    libva-mesa-driver \
     mesa-va-drivers \
     mesa-vulkan-drivers \
     --setopt=install_weak_deps=False
