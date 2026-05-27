@@ -225,7 +225,7 @@ sudo systemctl enable --now systemd-oomd.service
 sudo systemctl daemon-reexec
 sudo systemctl start /dev/zram0 2>/dev/null || true
 
-# 16. FLATPAK
+# 16. FLATPAK 
 sudo flatpak remote-add --system --if-not-exists flathub \
     https://flathub.org/repo/flathub.flatpakrepo
 
@@ -234,10 +234,21 @@ APPS=(
     "com.mattjakeman.ExtensionManager"
 )
 
+MAX_RETRIES=3
+
 for app in "${APPS[@]}"; do
     echo "Installing $app..."
-    sudo flatpak install --system -y flathub "$app" || \
-        echo "WARN: Failed to install $app"
+    for attempt in $(seq 1 $MAX_RETRIES); do
+        if sudo flatpak install --system -y flathub "$app"; then
+            break
+        fi
+        echo "Attempt $attempt of $MAX_RETRIES failed for $app."
+        if [[ $attempt -eq $MAX_RETRIES ]]; then
+            echo "ERROR: $app could not be installed after $MAX_RETRIES attempts. Aborting."
+            exit 1
+        fi
+        sleep 5
+    done
 done
 
 sudo flatpak override --system --filesystem=xdg-config/gtk-4.0:ro
