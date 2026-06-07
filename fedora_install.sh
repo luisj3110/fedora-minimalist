@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# FEDORA MINIMALIST INSTALLER — Universal Edition
+# FEDORA MINIMALIST INSTALLER
 # Tested on: Fedora Everything 44
 # Supports: AMD / Intel CPU — NVIDIA / AMD / Intel GPU — Laptop & Desktop
 # =============================================================================
@@ -25,7 +25,7 @@ if [[ "$DRY_RUN" -eq 0 ]]; then
 fi
 
 echo "============================================="
-echo " FEDORA MINIMALIST INSTALLER — Universal"
+echo " FEDORA MINIMALIST INSTALLER"
 echo "============================================="
 
 # HARDWARE DETECTION
@@ -137,7 +137,6 @@ echo "[3/17] Installing GNOME desktop environment..."
 
 sudo dnf install -y \
     @gnome-desktop \
-    --skip-unavailable
 
 sudo systemctl enable --now NetworkManager
 
@@ -183,15 +182,19 @@ sudo dnf install -y \
     btop \
     fastfetch \
     flatpak \
-    gnome-tweaks \
+    xdg-desktop-portal-gnome \
     kitty \
-    --setopt=install_weak_deps=False --skip-unavailable
+    --setopt=install_weak_deps=False
 
 
 # 7. SYSTEM SERVICES
-echo "[7/17] Enabling system services..."
+echo "[7/17] Installing and enabling system services..."
 
-sudo systemctl enable --now tuned.service
+# Primero aseguramos la instalación del demonio de energía de GNOME
+sudo dnf install -y power-profiles-daemon --setopt=install_weak_deps=False
+
+# Ahora sí, habilitamos el servicio nativo
+sudo systemctl enable --now power-profiles-daemon.service
 
 if [[ "$FORM_FACTOR" == "laptop" ]]; then
     sudo systemctl enable --now bluetooth.service
@@ -263,14 +266,14 @@ if [[ "$IGPU_VENDOR" == "amd" || "$DGPU_VENDOR" == "amd" ]]; then
         mesa-va-drivers \
         mesa-vulkan-drivers \
         xorg-x11-drv-amdgpu \
-        --setopt=install_weak_deps=False --skip-unavailable
+        --setopt=install_weak_deps=False
 fi
 
 if [[ "$IGPU_VENDOR" == "intel" ]]; then
     sudo dnf install -y \
         intel-media-driver \
         mesa-vulkan-drivers \
-        --setopt=install_weak_deps=False --skip-unavailable
+        --setopt=install_weak_deps=False
 fi
 
 install_nvidia() {
@@ -286,7 +289,6 @@ install_nvidia() {
         vulkan-loader \
         xorg-x11-drv-nvidia-cuda \
         xorg-x11-drv-nvidia-power \
-        --skip-unavailable
 
     if [[ "$FORM_FACTOR" == "laptop" && "$IGPU_VENDOR" != "none" ]]; then
         sudo dnf install -y switcheroo-control --setopt=install_weak_deps=False
@@ -365,7 +367,7 @@ echo "[14/17] Installing tablet and graphics libraries..."
 sudo dnf install -y \
     libwacom \
     mesa-libGLU \
-    --setopt=install_weak_deps=False --skip-unavailable
+    --setopt=install_weak_deps=False
 
 # Verifying package availability explicitly resolving network/cache states with standard I/O redirection
 if dnf list available digimend-kernel-drivers > /dev/null 2>&1; then
@@ -439,7 +441,6 @@ sudo flatpak remote-add --system --if-not-exists flathub \
 
 APPS=(
     "com.brave.Browser"
-    "com.mattjakeman.ExtensionManager"
 )
 
 MAX_RETRIES=3
