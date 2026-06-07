@@ -188,13 +188,9 @@ sudo dnf install -y \
 
 
 # 7. SYSTEM SERVICES
-echo "[7/17] Installing and enabling system services..."
+echo "[7/17] Enabling system services..."
 
-# Primero aseguramos la instalación del demonio de energía de GNOME
-sudo dnf install -y power-profiles-daemon --setopt=install_weak_deps=False
-
-# Ahora sí, habilitamos el servicio nativo
-sudo systemctl enable --now power-profiles-daemon.service
+sudo systemctl enable --now tuned.service
 
 if [[ "$FORM_FACTOR" == "laptop" ]]; then
     sudo systemctl enable --now bluetooth.service
